@@ -1,0 +1,11 @@
+version: '3.6'
+services:
+  apache:
+    image: ubuntu/apache2:2.4-20.04_beta
+    ports:
+     - "8080:8080/tcp"
+    volumes:
+      - ./conf/aliases:/etc/apache2/aliases
+      - ./conf/rewrite-rules:/etc/apache2/Guru/rewrite-rules
+      - ./conf/vhost:/etc/apache2/sites-available
+    

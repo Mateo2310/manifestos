@@ -1,0 +1,8 @@
+##
+##  Hostname rewriting map. This map is used to change non www domains to www domains
+##
+ar.amarillas.dev.yellargentina.com www.ar.amarillas.dev.yellargentina.com
+www.ar.amarillas.dev.yellargentina.com www.ar.amarillas.dev.yellargentina.com
+
+# SEO - Temporal old URLs mappings
+empresas.ar.amarillas.dev.yellargentina.com www.ar.amarillas.dev.yellargentina.com
