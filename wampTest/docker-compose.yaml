@@ -1,11 +1,15 @@
 version: '3.6'
 services:
   apache:
-    image: ubuntu/apache2:2.4-20.04_beta
+    image: guru-legacy:1.0
     ports:
      - "8080:8080/tcp"
     volumes:
       - ./conf/aliases:/etc/apache2/aliases
       - ./conf/rewrite-rules:/etc/apache2/Guru/rewrite-rules
       - ./conf/vhost:/etc/apache2/sites-available
+  jdk-8:
+    image: openjdk:8
+    volumes:
+      - ./conf/java.security:/etc/java-8-openjdk/security
     
