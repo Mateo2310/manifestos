@@ -1,0 +1,22 @@
+version: '3.6'
+
+services:
+  mysql5:
+    image: mysql:5.7.35
+    container_name: mysql5
+    ports:
+      - 3306:3306
+    volumes:
+      - mysql5_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+
+    networks:
+      - common
+
+volumes:
+  mysql5_data:
+    external: true
+
+networks:
+  common:

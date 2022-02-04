@@ -1,0 +1,18 @@
+version: '3.6'
+services:
+  sonar-scanner:
+    image: sonarsource/sonar-scanner-cli:4.6
+    container_name: sonar-scanner
+    environment:
+      SONAR_HOST_URL: 'http://sonarqube:9000'
+      SONAR_LOGIN: 'admin'
+      SONAR_PASSWORD: 'admin1234'
+    volumes:
+      - '${PROJECT_DIR}:/usr/src'
+      # - './sonar-project.properties:/usr/src/sonar-project.properties'
+    networks:
+      - common
+
+networks:
+  common:
+    external: true
