@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prueba de Header Authorization Local</title>
+</head>
+<body>
+
+    <h2>Simulador de Login - Prueba Local</h2>
+    <label for="token">Token JWT (con Bearer):</label>
+    <input type="text" id="token" style="width: 500px;" 
+           value="Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYXRlb2VucmlxdWV2aWxsYW51ZXZhQGd..." 
+           placeholder="Pega aquí tu JWT de prueba">
+    <br><br>
+    
+    <label for="code">Código de Autorización (code):</label>
+    <input type="text" id="code" value="auth_code_simulado">
+    <br><br>
+
+    <button onclick="testLogin('meta')">Probar Finalización de Meta</button>
+    <button onclick="testLogin('tiendanube')">Probar Finalización de Tienda nube</button>
+    <br><br>
+    <label>
+        <input type="checkbox" id="openInNewTab"> Abrir en nueva pestaña
+    </label>
+    
+    <p id="resultado" style="margin-top: 20px; font-weight: bold;"></p>
+
+    <script>
+        // Cambia el puerto si es necesario, pero DEBE ser localhost
+        const API_BASE_URL = 'http://localhost:8081/oauth2'; 
+
+        function testLogin(provider) {
+            const token = document.getElementById('token').value;
+            const code = document.getElementById('code').value;
+            const resultadoElement = document.getElementById('resultado');
+            resultadoElement.textContent = 'Enviando solicitud a ' + API_BASE_URL + '...';
+
+            if (!token.startsWith('Bearer ')) {
+                resultadoElement.textContent = 'Error: El token debe comenzar con "Bearer ".';
+                resultadoElement.style.color = 'red';
+                return;
+            }
+
+            // Endpoint que estamos probando: /api/auth/finalize?code=...&provider=...
+            const finalizeUrl = `${API_BASE_URL}/${provider}/login`;
+            console.log('URL de finalización:', finalizeUrl);
+            console.log('Token enviado:', token);
+            
+            fetch(finalizeUrl, {
+                method: 'GET',
+                headers: {
+                    'Authorization': token,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                mode: 'cors',
+                redirect: 'manual' // Para manejar manualmente las redirecciones
+            })
+            .then(response => {
+                console.log('Status:', response.status);
+                console.log('Headers:', response.headers);
+                
+                // Si es una redirección (302, 301, etc.)
+                if (response.status >= 300 && response.status < 400) {
+                    const redirectUrl = response.headers.get('Location');
+                    if (redirectUrl) {
+                        resultadoElement.style.color = 'blue';
+                        resultadoElement.textContent = `Redirigiendo a ${provider.toUpperCase()}...`;
+                        console.log('Redirigiendo a:', redirectUrl);
+                        
+                        // Verificar si se debe abrir en nueva pestaña
+                        const openInNewTab = document.getElementById('openInNewTab').checked;
+                        
+                        if (openInNewTab) {
+                            // Abrir en nueva pestaña
+                            window.open(redirectUrl, '_blank');
+                            resultadoElement.textContent = `Abierto en nueva pestaña: ${provider.toUpperCase()}`;
+                        } else {
+                            // Redirigir en la misma ventana
+                            window.location.href = redirectUrl;
+                        }
+                        return;
+                    }
+                }
+                
+                // Si la respuesta no es ok y no es redirección
+                if (!response.ok) {
+                    return response.text().then(text => { 
+                        throw new Error(`Error ${response.status}: ${text || response.statusText}`);
+                    });
+                }
+                
+                return response.text();
+            })
+            .then(data => {
+                if (data) {
+                    resultadoElement.style.color = 'green';
+                    resultadoElement.textContent = `Éxito! Respuesta de Spring Boot: ${data.substring(0, 100)}...`;
+                    console.log('Respuesta completa:', data);
+                }
+            })
+            .catch(error => {
+                resultadoElement.style.color = 'red';
+                console.error('Error completo:', error);
+                console.error('Tipo de error:', error.name);
+                console.error('Mensaje de error:', error.message);
+                
+                if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    resultadoElement.textContent = `Error de CORS o conexión: ${error.message}. Verifica que el servidor Spring Boot esté corriendo y tenga CORS habilitado.`;
+                } else {
+                    resultadoElement.textContent = `Fallo en la prueba: ${error.message}`;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
